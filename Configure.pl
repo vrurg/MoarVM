@@ -266,8 +266,8 @@ else {
                         . ' ' . $defaults{ccinc} . '3rdparty/libuv/src';
     $config{install}   .= "\t\$(MKPATH) \$(DESTDIR)\$(PREFIX)/include/libuv\n"
                         . "\t\$(MKPATH) \$(DESTDIR)\$(PREFIX)/include/libuv/uv\n"
-                        . "\t\$(CP) 3rdparty/libuv/include/*.h \$(DESTDIR)\$(PREFIX)/include/libuv\n"
-                        . "\t\$(CP) 3rdparty/libuv/include/uv/*.h \$(DESTDIR)\$(PREFIX)/include/libuv/uv\n";
+                        . "\t\$(CP) 3rdparty/libuv/include/*.h \"\$(DESTDIR)\$(PREFIX)/include/libuv\"\n"
+                        . "\t\$(CP) 3rdparty/libuv/include/uv/*.h \"\$(DESTDIR)\$(PREFIX)/include/libuv/uv\"\n";
 }
 
 if ($args{'has-libatomic_ops'}) {
