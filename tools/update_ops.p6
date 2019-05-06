@@ -26,35 +26,49 @@ class Op {
     has %.adverbs;
     method generator() {
         my $offset = 2;
-        $.name eq 'const_i64'
-            ??
-    'sub ($op0, int $value) {
-        my $bytecode := $*MAST_FRAME.bytecode;
-        my uint $elems := nqp::elems($bytecode);
-        my uint $index := nqp::unbox_u($op0);
-        if -32767 < $value && $value < 32768 {
-            nqp::writeuint($bytecode, $elems, 597, 5);
-            nqp::writeuint($bytecode, nqp::add_i($elems, 2), $index, 5);
-            nqp::writeuint($bytecode, nqp::add_i($elems, 4), $value, 5);
+        if $.name eq "prepargs" {
+            my $signature = @!operands.map({self.generate_arg($_, $++)}).join(', ');
+            'sub (' ~ $signature ~ ') {' ~
+            ~ 'die("MAST::Ops generator for prepargs NYI (QASTOperationsMAST is supposed to do it by itself)");'
+            ~ '}';
         }
-        elsif -2147483647 < $value && $value < 2147483647 {
-            nqp::writeuint($bytecode, $elems, 598, 5);
-            nqp::writeuint($bytecode, nqp::add_i($elems, 2), $index, 5);
-            nqp::writeuint($bytecode, nqp::add_i($elems, 4), $value, 9);
+        elsif $.name eq "const_i64" {
+            q:to/CODE/.subst("CODE_GOES_HERE", $.code).chomp;
+            sub ($op0, int $value) {
+                    my $bytecode := $*MAST_FRAME.bytecode;
+                    my uint $elems := nqp::elems($bytecode);
+                    my uint $index := nqp::unbox_u($op0);
+                    if -32767 < $value && $value < 32768 {
+                        nqp::writeuint($bytecode, $elems, 597, 5);
+                        nqp::writeuint($bytecode, nqp::add_i($elems, 2), $index, 5);
+                        nqp::writeuint($bytecode, nqp::add_i($elems, 4), $value, 5);
+                    }
+                    elsif -2147483647 < $value && $value < 2147483647 {
+                        nqp::writeuint($bytecode, $elems, 598, 5);
+                        nqp::writeuint($bytecode, nqp::add_i($elems, 2), $index, 5);
+                        nqp::writeuint($bytecode, nqp::add_i($elems, 4), $value, 9);
+                    }
+                    else {
+                        nqp::writeuint($bytecode, $elems, CODE_GOES_HERE, 5);
+                        nqp::writeuint($bytecode, nqp::add_i($elems, 2), $index, 5);
+                        nqp::writeuint($bytecode, nqp::add_i($elems, 4), $value, 13);
+                    }
+                }
+            CODE
+        } else {
+            my $signature = @!operands.map({self.generate_arg($_, $++)}).join(', ');
+            my $frame-getter = self.needs_frame
+                ?? 'my $frame := $*MAST_FRAME; my $bytecode := $frame.bytecode;'
+                !! 'my $bytecode := $*MAST_FRAME.bytecode;';
+            my $operands-code = join("\n", @!operands.map({"                " ~ self.generate_operand($_, $++, $offset)}));
+
+            'sub (' ~ $signature ~ ') {' ~ "\n" ~
+                $frame-getter.indent(8) ~ ('
+                my uint $elems := nqp::elems($bytecode);
+                nqp::writeuint($bytecode, $elems, ' ~ $.code ~ ', 5);
+' ~ $operands-code ~ '
+            }').indent(-8);
         }
-        else {
-            nqp::writeuint($bytecode, $elems, ' ~ $.code ~ ', 5);
-            nqp::writeuint($bytecode, nqp::add_i($elems, 2), $index, 5);
-            nqp::writeuint($bytecode, nqp::add_i($elems, 4), $value, 13);
-        }
-    }'
-            !!
-    'sub (' ~ @!operands.map({self.generate_arg($_, $++)}).join(', ') ~ ') {
-        ' ~ (self.needs_frame ?? 'my $frame := $*MAST_FRAME; my $bytecode := $frame.bytecode;' !! 'my $bytecode := $*MAST_FRAME.bytecode;') ~ '
-        my uint $elems := nqp::elems($bytecode);
-        nqp::writeuint($bytecode, $elems, ' ~ $.code ~ ', 5);
-        ' ~ join("\n        ", @!operands.map({self.generate_operand($_, $++, $offset)})) ~ '
-    }'
     }
     method needs_frame() {
         for @!operands -> $operand {
@@ -94,7 +108,7 @@ class Op {
             }
         }
     }
-    sub writeuint($offset is rw, $size, $var) {
+    sub makewriteuint($offset is rw, $size, $var) {
         my $pos = $offset;
         $offset += $size;
         my $flags = $size * 2;
@@ -102,7 +116,7 @@ class Op {
         $flags++; # force little endian
         'nqp::writeuint($bytecode, nqp::add_i($elems, ' ~ $pos ~ '), ' ~ $var ~ ', ' ~ $flags ~ ');'
     }
-    sub writenum($offset is rw, $var) {
+    sub makewritenum($offset is rw, $var) {
         my $pos = $offset;
         $offset += 8;
         'nqp::writenum($bytecode, nqp::add_i($elems, ' ~ $pos ~ '), ' ~ $var ~ ', 13)'
@@ -111,45 +125,29 @@ class Op {
         if OperandFlag.parse($operand) -> (:$rw, :$type, :$type_var, :$special) {
             if !$rw {
                 if ($type // '') eq 'int64' {
-                    '{my int $value := $op' ~ $i ~ '; ' ~ writeuint($offset, 8, '$value') ~ '}'
+                    makewriteuint($offset, 8, '$op' ~ $i)
                 }
                 elsif ($type // '') eq 'int32' {
-                    '{my int $value := $op' ~ $i ~ ';
-                    if $value < -2147483648 || 2147483647 < $value {
-                        nqp::die("Value outside range of 32-bit MAST::IVal");
-                    }
-                    ' ~ writeuint($offset, 8, '$value') ~ '}'
+                    makewriteuint($offset, 8, '$op' ~ $i)
                 }
                 elsif ($type // '') eq 'uint32' {
-                    '{my int $value := $op' ~ $i ~ ';
-                    if $value < 0 || 4294967296 < $value {
-                        nqp::die("Value outside range of 32-bit MAST::IVal");
-                    }
-                    ' ~ writeuint($offset, 8, '$value') ~ '}'
+                    makewriteuint($offset, 8, '$op' ~ $i)
                 }
                 elsif ($type // '') eq 'int16' {
-                    '{my int $value := $op' ~ $i ~ ';
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    ' ~ writeuint($offset, 2, '$value') ~ '}'
+                    makewriteuint($offset, 2, '$op' ~ $i)
                 }
                 elsif ($type // '') eq 'int8' {
-                    '{my int $value := $op' ~ $i ~ ';
-                    if $value < -128 || 127 < $value {
-                        nqp::die("Value outside range of 8-bit MAST::IVal");
-                    }
-                    ' ~ writeuint($offset, 2, '$value') ~ '}'
+                    makewriteuint($offset, 2, '$op' ~ $i)
                 }
                 elsif ($type // '') eq 'num64' {
-                    writenum($offset, '$op' ~ $i)
+                    makewritenum($offset, '$op' ~ $i)
                 }
                 elsif ($type // '') eq 'num32' {
-                    writenum($offset, '$op' ~ $i)
+                    makewritenum($offset, '$op' ~ $i)
                 }
                 elsif ($type // '') eq 'str' {
                     'my uint $index' ~ $i ~ ' := $frame.add-string($op' ~ $i ~ '); '
-                    ~ writeuint($offset, 4, '$index' ~ $i);
+                    ~ makewriteuint($offset, 4, '$index' ~ $i);
                 }
                 elsif ($special // '') eq 'ins' {
                     $offset += 4;
@@ -157,7 +155,7 @@ class Op {
                 }
                 elsif ($special // '') eq 'coderef' {
                     'my uint $index' ~ $i ~ ' := $frame.writer.get_frame_index($op' ~ $i ~ '); '
-                    ~ writeuint($offset, 2, '$index' ~ $i)
+                    ~ makewriteuint($offset, 2, '$index' ~ $i)
                 }
                 elsif ($special // '') eq 'callsite' {
                 }
@@ -181,14 +179,14 @@ class Op {
 #                }
                 'my uint $index' ~ $i ~ ' := nqp::unbox_u($op' ~ $i ~ '); '
 
-                ~ writeuint($offset, 2, '$index' ~ $i)
+                ~ makewriteuint($offset, 2, '$index' ~ $i)
             }
             elsif $rw eq 'rl' || $rw eq 'wl' {
                 q[nqp::die("Expected MAST::Lexical, but didn't get one") unless nqp::istype($op] ~ $i ~ q[, MAST::Lexical);]
                 ~ 'my uint $index' ~ $i ~ ' := $op' ~ $i ~ '.index; '
                 ~ 'my uint $frames_out' ~ $i ~ ' := $op' ~ $i ~ '.frames_out; '
-                ~ writeuint($offset, 2, '$index' ~ $i)
-                ~ writeuint($offset, 2, '$frames_out' ~ $i)
+                ~ makewriteuint($offset, 2, '$index' ~ $i)
+                ~ makewriteuint($offset, 2, '$frames_out' ~ $i)
             }
             else {
                 die("Unknown operand mode $rw cannot be compiled");
@@ -214,18 +212,26 @@ sub MAIN($file = "src/core/oplist") {
     $hf.say("#define MVM_OP_EXT_CU_LIMIT $EXT_CU_LIMIT");
     $hf.say('');
     $hf.say('MVM_PUBLIC const MVMOpInfo * MVM_op_get_op(unsigned short op);');
+    $hf.say('MVM_PUBLIC const char * MVM_op_get_mark(unsigned short op);');
     $hf.close;
 
     # Generate C file
     my $cf = open("src/core/ops.c", :w);
-    $cf.say('#include "moar.h"');
-    $cf.say("/* This file is generated from $file by tools/update_ops.p6. */");
-    $cf.say(opcode_details(@ops));
-    $cf.say('MVM_PUBLIC const MVMOpInfo * MVM_op_get_op(unsigned short op) {');
-    $cf.say('    if (op >= MVM_op_counts)');
-    $cf.say('        return NULL;');
-    $cf.say('    return &MVM_op_infos[op];');
-    $cf.say('}');
+    $cf.say(qq:to/CORE_OPS/);
+        #include "moar.h"
+        /* This file is generated from $file by tools/update_ops.p6. */
+        { opcode_details(@ops) }
+        MVM_PUBLIC const MVMOpInfo * MVM_op_get_op(unsigned short op) \{
+            if (op >= MVM_op_counts)
+                return NULL;
+            return \&MVM_op_infos[op];
+        }
+
+        MVM_PUBLIC const char *MVM_op_get_mark(unsigned short op) \{
+{ mark_spans(@ops) }
+        }
+
+        CORE_OPS
     $cf.close;
 
     # Generate cgoto labels header.
@@ -408,7 +414,6 @@ sub opcode_details(@ops) {
             take "    \{";
             take "        MVM_OP_$op.name(),";
             take "        \"$op.name()\",";
-            take "        \"$op.mark()\",";
             take "        $op.operands.elems(),";
             take "        $($op.adverbs<pure> ?? '1' !! '0'),";
             take "        $(
@@ -432,6 +437,80 @@ sub opcode_details(@ops) {
         take "};\n";
         take "static const unsigned short MVM_op_counts = {+@ops};\n";
     }
+}
+
+# Create code to look up an op's mark
+# since marks are rare in the first section of the op list
+# and all marks after a certain point have one (spesh ops),
+# and the marks are only used by the validator anyway,
+# we can leave them out of the MVM_op_infos array that has
+# data used all over the place, thus saving a little bit of
+# memory.
+# 
+# We foolishly(?) rely on the first op to not have a mark
+sub mark_spans(@ops) {
+    my %current;
+    my @spans;
+    %current<mark> = "  ";
+    die "expected first op to not have a mark" unless @ops.head.mark eq "  ";
+    sub store-span {
+        @spans.push(Map.new(%current));
+    }
+    sub make-lookup-code {
+        die "expected last span of ops to have the .s mark" unless @spans.tail.<mark> eq ".s";
+        my $spesh-start = @spans.pop.<start>;
+        my @pieces;
+        @pieces.push: q:s:to/CODE/;
+            if (op > $spesh-start) {
+                return ".s";
+            CODE
+        for @spans {
+            if .<count> == 1 {
+                @pieces.push: qq:to/CODE/;
+                    } else if (op == $_.<start>) \{
+                        return "{ .<mark> }";
+                    CODE
+            }
+            else {
+                @pieces.push: qq:to/CODE/;
+                    } else if (op >= $_.<start> && op < { .<start> + .<count> }) \{
+                        return "{ .<mark> }";
+                    CODE
+            }
+        }
+        @pieces.push: qq:to/CODE/;
+            } else if (op >= MVM_OP_EXT_BASE) \{
+                return ".x";
+            CODE
+        @pieces.push: "}\n";
+        @pieces.push: 'return "  ";';
+        @pieces.join().indent(4);
+    }
+    for @ops {
+        my $mark = .mark();
+        if $mark ne '  ' {
+            if %current<mark> eq $mark {
+                %current<count>++;
+            }
+            else {
+                if %current<mark> ne "  " {
+                    store-span;
+                }
+                %current<mark> = $mark;
+                %current<count> = 1;
+                %current<start> = .code;
+            }
+        }
+        else {
+            if %current<mark> ne "  " {
+                store-span;
+            }
+            %current<mark> = "  ";
+        }
+    }
+    store-span;
+
+    make-lookup-code;
 }
 
 my %rwflags = (

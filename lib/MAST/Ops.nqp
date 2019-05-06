@@ -5364,40 +5364,28 @@ BEGIN {
         my $bytecode := $*MAST_FRAME.bytecode;
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 0, 5);
-        
+
     },
     'const_i8', sub ($op0, int8 $op1) {
         my $bytecode := $*MAST_FRAME.bytecode;
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 1, 5);
         my uint $index0 := nqp::unbox_u($op0); nqp::writeuint($bytecode, nqp::add_i($elems, 2), $index0, 5);
-        {my int $value := $op1;
-                    if $value < -128 || 127 < $value {
-                        nqp::die("Value outside range of 8-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 4), $value, 5);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 4), $op1, 5);
     },
     'const_i16', sub ($op0, int16 $op1) {
         my $bytecode := $*MAST_FRAME.bytecode;
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 2, 5);
         my uint $index0 := nqp::unbox_u($op0); nqp::writeuint($bytecode, nqp::add_i($elems, 2), $index0, 5);
-        {my int $value := $op1;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 4), $value, 5);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 4), $op1, 5);
     },
     'const_i32', sub ($op0, int32 $op1) {
         my $bytecode := $*MAST_FRAME.bytecode;
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 3, 5);
         my uint $index0 := nqp::unbox_u($op0); nqp::writeuint($bytecode, nqp::add_i($elems, 2), $index0, 5);
-        {my int $value := $op1;
-                    if $value < -2147483648 || 2147483647 < $value {
-                        nqp::die("Value outside range of 32-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 4), $value, 13);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 4), $op1, 13);
     },
     'const_i64', sub ($op0, int $value) {
         my $bytecode := $*MAST_FRAME.bytecode;
@@ -5625,7 +5613,7 @@ BEGIN {
         my $bytecode := $*MAST_FRAME.bytecode;
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 34, 5);
-        {my int $value := $op0; nqp::writeuint($bytecode, nqp::add_i($elems, 2), $value, 13);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 2), $op0, 13);
         my uint $index1 := nqp::unbox_u($op1); nqp::writeuint($bytecode, nqp::add_i($elems, 10), $index1, 5);
     },
     'getlex', sub ($op0, $op1) {
@@ -5733,11 +5721,7 @@ BEGIN {
         my uint $index0 := nqp::unbox_u($op0); nqp::writeuint($bytecode, nqp::add_i($elems, 2), $index0, 5);
         my uint $index1 := $frame.add-string($op1); nqp::writeuint($bytecode, nqp::add_i($elems, 4), $index1, 9);
         my uint $index2 := nqp::unbox_u($op2); nqp::writeuint($bytecode, nqp::add_i($elems, 8), $index2, 5);
-        {my int $value := $op3;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 10), $value, 5);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 10), $op3, 5);
     },
     'lexprimspec', sub ($op0, $op1, $op2) {
         my $bytecode := $*MAST_FRAME.bytecode;
@@ -5775,7 +5759,7 @@ BEGIN {
         my $bytecode := $*MAST_FRAME.bytecode;
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 55, 5);
-        
+
     },
     'eq_i', sub ($op0, $op1, $op2) {
         my $bytecode := $*MAST_FRAME.bytecode;
@@ -6306,87 +6290,54 @@ BEGIN {
         my uint $index0 := nqp::unbox_u($op0); nqp::writeuint($bytecode, nqp::add_i($elems, 2), $index0, 5);
         my uint $index1 := nqp::unbox_u($op1); nqp::writeuint($bytecode, nqp::add_i($elems, 4), $index1, 5);
     },
-    'prepargs', sub ($op0) {
-        my $bytecode := $*MAST_FRAME.bytecode;
-        my uint $elems := nqp::elems($bytecode);
-        nqp::writeuint($bytecode, $elems, 127, 5);
-        
-    },
+    'prepargs', sub ($op0) {die("MAST::Ops generator for prepargs NYI (QASTOperationsMAST is supposed to do it by itself)");},
     'arg_i', sub (int16 $op0, $op1) {
         my $bytecode := $*MAST_FRAME.bytecode;
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 128, 5);
-        {my int $value := $op0;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 2), $value, 5);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 2), $op0, 5);
         my uint $index1 := nqp::unbox_u($op1); nqp::writeuint($bytecode, nqp::add_i($elems, 4), $index1, 5);
     },
     'arg_n', sub (int16 $op0, $op1) {
         my $bytecode := $*MAST_FRAME.bytecode;
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 129, 5);
-        {my int $value := $op0;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 2), $value, 5);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 2), $op0, 5);
         my uint $index1 := nqp::unbox_u($op1); nqp::writeuint($bytecode, nqp::add_i($elems, 4), $index1, 5);
     },
     'arg_s', sub (int16 $op0, $op1) {
         my $bytecode := $*MAST_FRAME.bytecode;
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 130, 5);
-        {my int $value := $op0;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 2), $value, 5);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 2), $op0, 5);
         my uint $index1 := nqp::unbox_u($op1); nqp::writeuint($bytecode, nqp::add_i($elems, 4), $index1, 5);
     },
     'arg_o', sub (int16 $op0, $op1) {
         my $bytecode := $*MAST_FRAME.bytecode;
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 131, 5);
-        {my int $value := $op0;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 2), $value, 5);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 2), $op0, 5);
         my uint $index1 := nqp::unbox_u($op1); nqp::writeuint($bytecode, nqp::add_i($elems, 4), $index1, 5);
     },
     'argconst_i', sub (int16 $op0, int64 $op1) {
         my $bytecode := $*MAST_FRAME.bytecode;
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 132, 5);
-        {my int $value := $op0;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 2), $value, 5);}
-        {my int $value := $op1; nqp::writeuint($bytecode, nqp::add_i($elems, 4), $value, 13);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 2), $op0, 5);
+        nqp::writeuint($bytecode, nqp::add_i($elems, 4), $op1, 13);
     },
     'argconst_n', sub (int16 $op0, num64 $op1) {
         my $bytecode := $*MAST_FRAME.bytecode;
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 133, 5);
-        {my int $value := $op0;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 2), $value, 5);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 2), $op0, 5);
         nqp::writenum($bytecode, nqp::add_i($elems, 4), $op1, 13)
     },
     'argconst_s', sub (int16 $op0, str $op1) {
         my $frame := $*MAST_FRAME; my $bytecode := $frame.bytecode;
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 134, 5);
-        {my int $value := $op0;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 2), $value, 5);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 2), $op0, 5);
         my uint $index1 := $frame.add-string($op1); nqp::writeuint($bytecode, nqp::add_i($elems, 4), $index1, 9);
     },
     'invoke_v', sub ($op0) {
@@ -6427,71 +6378,43 @@ BEGIN {
         my $bytecode := $*MAST_FRAME.bytecode;
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 140, 5);
-        {my int $value := $op0;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 2), $value, 5);}
-        {my int $value := $op1;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 4), $value, 5);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 2), $op0, 5);
+        nqp::writeuint($bytecode, nqp::add_i($elems, 4), $op1, 5);
     },
     'param_rp_i', sub ($op0, int16 $op1) {
         my $bytecode := $*MAST_FRAME.bytecode;
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 141, 5);
         my uint $index0 := nqp::unbox_u($op0); nqp::writeuint($bytecode, nqp::add_i($elems, 2), $index0, 5);
-        {my int $value := $op1;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 4), $value, 5);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 4), $op1, 5);
     },
     'param_rp_n', sub ($op0, int16 $op1) {
         my $bytecode := $*MAST_FRAME.bytecode;
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 142, 5);
         my uint $index0 := nqp::unbox_u($op0); nqp::writeuint($bytecode, nqp::add_i($elems, 2), $index0, 5);
-        {my int $value := $op1;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 4), $value, 5);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 4), $op1, 5);
     },
     'param_rp_s', sub ($op0, int16 $op1) {
         my $bytecode := $*MAST_FRAME.bytecode;
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 143, 5);
         my uint $index0 := nqp::unbox_u($op0); nqp::writeuint($bytecode, nqp::add_i($elems, 2), $index0, 5);
-        {my int $value := $op1;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 4), $value, 5);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 4), $op1, 5);
     },
     'param_rp_o', sub ($op0, int16 $op1) {
         my $bytecode := $*MAST_FRAME.bytecode;
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 144, 5);
         my uint $index0 := nqp::unbox_u($op0); nqp::writeuint($bytecode, nqp::add_i($elems, 2), $index0, 5);
-        {my int $value := $op1;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 4), $value, 5);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 4), $op1, 5);
     },
     'param_op_i', sub ($op0, int16 $op1, $op2) {
         my $frame := $*MAST_FRAME; my $bytecode := $frame.bytecode;
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 145, 5);
         my uint $index0 := nqp::unbox_u($op0); nqp::writeuint($bytecode, nqp::add_i($elems, 2), $index0, 5);
-        {my int $value := $op1;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 4), $value, 5);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 4), $op1, 5);
         $frame.compile_label($bytecode, $op2);
     },
     'param_op_n', sub ($op0, int16 $op1, $op2) {
@@ -6499,11 +6422,7 @@ BEGIN {
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 146, 5);
         my uint $index0 := nqp::unbox_u($op0); nqp::writeuint($bytecode, nqp::add_i($elems, 2), $index0, 5);
-        {my int $value := $op1;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 4), $value, 5);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 4), $op1, 5);
         $frame.compile_label($bytecode, $op2);
     },
     'param_op_s', sub ($op0, int16 $op1, $op2) {
@@ -6511,11 +6430,7 @@ BEGIN {
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 147, 5);
         my uint $index0 := nqp::unbox_u($op0); nqp::writeuint($bytecode, nqp::add_i($elems, 2), $index0, 5);
-        {my int $value := $op1;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 4), $value, 5);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 4), $op1, 5);
         $frame.compile_label($bytecode, $op2);
     },
     'param_op_o', sub ($op0, int16 $op1, $op2) {
@@ -6523,11 +6438,7 @@ BEGIN {
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 148, 5);
         my uint $index0 := nqp::unbox_u($op0); nqp::writeuint($bytecode, nqp::add_i($elems, 2), $index0, 5);
-        {my int $value := $op1;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 4), $value, 5);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 4), $op1, 5);
         $frame.compile_label($bytecode, $op2);
     },
     'param_rn_i', sub ($op0, str $op1) {
@@ -6595,11 +6506,7 @@ BEGIN {
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 157, 5);
         my uint $index0 := nqp::unbox_u($op0); nqp::writeuint($bytecode, nqp::add_i($elems, 2), $index0, 5);
-        {my int $value := $op1;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 4), $value, 5);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 4), $op1, 5);
     },
     'param_sn', sub ($op0) {
         my $bytecode := $*MAST_FRAME.bytecode;
@@ -6708,21 +6615,21 @@ BEGIN {
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 173, 5);
         my uint $index0 := nqp::unbox_u($op0); nqp::writeuint($bytecode, nqp::add_i($elems, 2), $index0, 5);
-        {my int $value := $op1; nqp::writeuint($bytecode, nqp::add_i($elems, 4), $value, 13);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 4), $op1, 13);
     },
     'throwcatlex', sub ($op0, int64 $op1) {
         my $bytecode := $*MAST_FRAME.bytecode;
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 174, 5);
         my uint $index0 := nqp::unbox_u($op0); nqp::writeuint($bytecode, nqp::add_i($elems, 2), $index0, 5);
-        {my int $value := $op1; nqp::writeuint($bytecode, nqp::add_i($elems, 4), $value, 13);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 4), $op1, 13);
     },
     'throwcatlexotic', sub ($op0, int64 $op1) {
         my $bytecode := $*MAST_FRAME.bytecode;
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 175, 5);
         my uint $index0 := nqp::unbox_u($op0); nqp::writeuint($bytecode, nqp::add_i($elems, 2), $index0, 5);
-        {my int $value := $op1; nqp::writeuint($bytecode, nqp::add_i($elems, 4), $value, 13);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 4), $op1, 13);
     },
     'die', sub ($op0, $op1) {
         my $bytecode := $*MAST_FRAME.bytecode;
@@ -7125,16 +7032,8 @@ BEGIN {
         my uint $index0 := nqp::unbox_u($op0); nqp::writeuint($bytecode, nqp::add_i($elems, 2), $index0, 5);
         my uint $index1 := nqp::unbox_u($op1); nqp::writeuint($bytecode, nqp::add_i($elems, 4), $index1, 5);
         my uint $index2 := nqp::unbox_u($op2); nqp::writeuint($bytecode, nqp::add_i($elems, 6), $index2, 5);
-        {my int $value := $op3;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 8), $value, 5);}
-        {my int $value := $op4;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 10), $value, 5);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 8), $op3, 5);
+        nqp::writeuint($bytecode, nqp::add_i($elems, 10), $op4, 5);
     },
     'chars', sub ($op0, $op1) {
         my $bytecode := $*MAST_FRAME.bytecode;
@@ -7448,11 +7347,7 @@ BEGIN {
         my uint $index1 := nqp::unbox_u($op1); nqp::writeuint($bytecode, nqp::add_i($elems, 4), $index1, 5);
         my uint $index2 := $frame.add-string($op2); nqp::writeuint($bytecode, nqp::add_i($elems, 6), $index2, 9);
         my uint $index3 := nqp::unbox_u($op3); nqp::writeuint($bytecode, nqp::add_i($elems, 10), $index3, 5);
-        {my int $value := $op4;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 12), $value, 5);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 12), $op4, 5);
     },
     'bindattr_n', sub ($op0, $op1, str $op2, $op3, int16 $op4) {
         my $frame := $*MAST_FRAME; my $bytecode := $frame.bytecode;
@@ -7462,11 +7357,7 @@ BEGIN {
         my uint $index1 := nqp::unbox_u($op1); nqp::writeuint($bytecode, nqp::add_i($elems, 4), $index1, 5);
         my uint $index2 := $frame.add-string($op2); nqp::writeuint($bytecode, nqp::add_i($elems, 6), $index2, 9);
         my uint $index3 := nqp::unbox_u($op3); nqp::writeuint($bytecode, nqp::add_i($elems, 10), $index3, 5);
-        {my int $value := $op4;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 12), $value, 5);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 12), $op4, 5);
     },
     'bindattr_s', sub ($op0, $op1, str $op2, $op3, int16 $op4) {
         my $frame := $*MAST_FRAME; my $bytecode := $frame.bytecode;
@@ -7476,11 +7367,7 @@ BEGIN {
         my uint $index1 := nqp::unbox_u($op1); nqp::writeuint($bytecode, nqp::add_i($elems, 4), $index1, 5);
         my uint $index2 := $frame.add-string($op2); nqp::writeuint($bytecode, nqp::add_i($elems, 6), $index2, 9);
         my uint $index3 := nqp::unbox_u($op3); nqp::writeuint($bytecode, nqp::add_i($elems, 10), $index3, 5);
-        {my int $value := $op4;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 12), $value, 5);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 12), $op4, 5);
     },
     'bindattr_o', sub ($op0, $op1, str $op2, $op3, int16 $op4) {
         my $frame := $*MAST_FRAME; my $bytecode := $frame.bytecode;
@@ -7490,11 +7377,7 @@ BEGIN {
         my uint $index1 := nqp::unbox_u($op1); nqp::writeuint($bytecode, nqp::add_i($elems, 4), $index1, 5);
         my uint $index2 := $frame.add-string($op2); nqp::writeuint($bytecode, nqp::add_i($elems, 6), $index2, 9);
         my uint $index3 := nqp::unbox_u($op3); nqp::writeuint($bytecode, nqp::add_i($elems, 10), $index3, 5);
-        {my int $value := $op4;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 12), $value, 5);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 12), $op4, 5);
     },
     'bindattrs_i', sub ($op0, $op1, $op2, $op3) {
         my $bytecode := $*MAST_FRAME.bytecode;
@@ -7540,11 +7423,7 @@ BEGIN {
         my uint $index1 := nqp::unbox_u($op1); nqp::writeuint($bytecode, nqp::add_i($elems, 4), $index1, 5);
         my uint $index2 := nqp::unbox_u($op2); nqp::writeuint($bytecode, nqp::add_i($elems, 6), $index2, 5);
         my uint $index3 := $frame.add-string($op3); nqp::writeuint($bytecode, nqp::add_i($elems, 8), $index3, 9);
-        {my int $value := $op4;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 12), $value, 5);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 12), $op4, 5);
     },
     'getattr_n', sub ($op0, $op1, $op2, str $op3, int16 $op4) {
         my $frame := $*MAST_FRAME; my $bytecode := $frame.bytecode;
@@ -7554,11 +7433,7 @@ BEGIN {
         my uint $index1 := nqp::unbox_u($op1); nqp::writeuint($bytecode, nqp::add_i($elems, 4), $index1, 5);
         my uint $index2 := nqp::unbox_u($op2); nqp::writeuint($bytecode, nqp::add_i($elems, 6), $index2, 5);
         my uint $index3 := $frame.add-string($op3); nqp::writeuint($bytecode, nqp::add_i($elems, 8), $index3, 9);
-        {my int $value := $op4;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 12), $value, 5);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 12), $op4, 5);
     },
     'getattr_s', sub ($op0, $op1, $op2, str $op3, int16 $op4) {
         my $frame := $*MAST_FRAME; my $bytecode := $frame.bytecode;
@@ -7568,11 +7443,7 @@ BEGIN {
         my uint $index1 := nqp::unbox_u($op1); nqp::writeuint($bytecode, nqp::add_i($elems, 4), $index1, 5);
         my uint $index2 := nqp::unbox_u($op2); nqp::writeuint($bytecode, nqp::add_i($elems, 6), $index2, 5);
         my uint $index3 := $frame.add-string($op3); nqp::writeuint($bytecode, nqp::add_i($elems, 8), $index3, 9);
-        {my int $value := $op4;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 12), $value, 5);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 12), $op4, 5);
     },
     'getattr_o', sub ($op0, $op1, $op2, str $op3, int16 $op4) {
         my $frame := $*MAST_FRAME; my $bytecode := $frame.bytecode;
@@ -7582,11 +7453,7 @@ BEGIN {
         my uint $index1 := nqp::unbox_u($op1); nqp::writeuint($bytecode, nqp::add_i($elems, 4), $index1, 5);
         my uint $index2 := nqp::unbox_u($op2); nqp::writeuint($bytecode, nqp::add_i($elems, 6), $index2, 5);
         my uint $index3 := $frame.add-string($op3); nqp::writeuint($bytecode, nqp::add_i($elems, 8), $index3, 9);
-        {my int $value := $op4;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 12), $value, 5);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 12), $op4, 5);
     },
     'getattrs_i', sub ($op0, $op1, $op2, $op3) {
         my $bytecode := $*MAST_FRAME.bytecode;
@@ -8241,13 +8108,13 @@ BEGIN {
         my $bytecode := $*MAST_FRAME.bytecode;
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 368, 5);
-        
+
     },
     'usecompilerhllconfig', sub () {
         my $bytecode := $*MAST_FRAME.bytecode;
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 369, 5);
-        
+
     },
     'iter', sub ($op0, $op1) {
         my $bytecode := $*MAST_FRAME.bytecode;
@@ -8513,28 +8380,16 @@ BEGIN {
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 406, 5);
         my uint $index0 := nqp::unbox_u($op0); nqp::writeuint($bytecode, nqp::add_i($elems, 2), $index0, 5);
-        {my int $value := $op1;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 4), $value, 5);}
-        {my int $value := $op2;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 6), $value, 5);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 4), $op1, 5);
+        nqp::writeuint($bytecode, nqp::add_i($elems, 6), $op2, 5);
     },
     'wval_wide', sub ($op0, int16 $op1, int64 $op2) {
         my $bytecode := $*MAST_FRAME.bytecode;
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 407, 5);
         my uint $index0 := nqp::unbox_u($op0); nqp::writeuint($bytecode, nqp::add_i($elems, 2), $index0, 5);
-        {my int $value := $op1;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 4), $value, 5);}
-        {my int $value := $op2; nqp::writeuint($bytecode, nqp::add_i($elems, 6), $value, 13);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 4), $op1, 5);
+        nqp::writeuint($bytecode, nqp::add_i($elems, 6), $op2, 13);
     },
     'scwbdisable', sub ($op0) {
         my $bytecode := $*MAST_FRAME.bytecode;
@@ -9650,7 +9505,7 @@ BEGIN {
         my $bytecode := $*MAST_FRAME.bytecode;
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 558, 5);
-        
+
     },
     'getuniname', sub ($op0, $op1) {
         my $bytecode := $*MAST_FRAME.bytecode;
@@ -9736,7 +9591,7 @@ BEGIN {
         my $bytecode := $*MAST_FRAME.bytecode;
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 569, 5);
-        
+
     },
     'currentthread', sub ($op0) {
         my $bytecode := $*MAST_FRAME.bytecode;
@@ -9959,22 +9814,14 @@ BEGIN {
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 597, 5);
         my uint $index0 := nqp::unbox_u($op0); nqp::writeuint($bytecode, nqp::add_i($elems, 2), $index0, 5);
-        {my int $value := $op1;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 4), $value, 5);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 4), $op1, 5);
     },
     'const_i64_32', sub ($op0, int32 $op1) {
         my $bytecode := $*MAST_FRAME.bytecode;
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 598, 5);
         my uint $index0 := nqp::unbox_u($op0); nqp::writeuint($bytecode, nqp::add_i($elems, 2), $index0, 5);
-        {my int $value := $op1;
-                    if $value < -2147483648 || 2147483647 < $value {
-                        nqp::die("Value outside range of 32-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 4), $value, 13);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 4), $op1, 13);
     },
     'isnonnull', sub ($op0, $op1) {
         my $bytecode := $*MAST_FRAME.bytecode;
@@ -10055,7 +9902,7 @@ BEGIN {
         my $bytecode := $*MAST_FRAME.bytecode;
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 608, 5);
-        
+
     },
     'nativecallcast', sub ($op0, $op1, $op2, $op3) {
         my $bytecode := $*MAST_FRAME.bytecode;
@@ -10114,7 +9961,7 @@ BEGIN {
         my $bytecode := $*MAST_FRAME.bytecode;
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 616, 5);
-        
+
     },
     'nativecallglobal', sub ($op0, $op1, $op2, $op3, $op4) {
         my $bytecode := $*MAST_FRAME.bytecode;
@@ -10342,11 +10189,7 @@ BEGIN {
         my uint $index1 := nqp::unbox_u($op1); nqp::writeuint($bytecode, nqp::add_i($elems, 4), $index1, 5);
         my uint $index2 := nqp::unbox_u($op2); nqp::writeuint($bytecode, nqp::add_i($elems, 6), $index2, 5);
         my uint $index3 := $frame.add-string($op3); nqp::writeuint($bytecode, nqp::add_i($elems, 8), $index3, 9);
-        {my int $value := $op4;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 12), $value, 5);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 12), $op4, 5);
     },
     'getattrref_n', sub ($op0, $op1, $op2, str $op3, int16 $op4) {
         my $frame := $*MAST_FRAME; my $bytecode := $frame.bytecode;
@@ -10356,11 +10199,7 @@ BEGIN {
         my uint $index1 := nqp::unbox_u($op1); nqp::writeuint($bytecode, nqp::add_i($elems, 4), $index1, 5);
         my uint $index2 := nqp::unbox_u($op2); nqp::writeuint($bytecode, nqp::add_i($elems, 6), $index2, 5);
         my uint $index3 := $frame.add-string($op3); nqp::writeuint($bytecode, nqp::add_i($elems, 8), $index3, 9);
-        {my int $value := $op4;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 12), $value, 5);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 12), $op4, 5);
     },
     'getattrref_s', sub ($op0, $op1, $op2, str $op3, int16 $op4) {
         my $frame := $*MAST_FRAME; my $bytecode := $frame.bytecode;
@@ -10370,11 +10209,7 @@ BEGIN {
         my uint $index1 := nqp::unbox_u($op1); nqp::writeuint($bytecode, nqp::add_i($elems, 4), $index1, 5);
         my uint $index2 := nqp::unbox_u($op2); nqp::writeuint($bytecode, nqp::add_i($elems, 6), $index2, 5);
         my uint $index3 := $frame.add-string($op3); nqp::writeuint($bytecode, nqp::add_i($elems, 8), $index3, 9);
-        {my int $value := $op4;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 12), $value, 5);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 12), $op4, 5);
     },
     'getattrsref_i', sub ($op0, $op1, $op2, $op3) {
         my $bytecode := $*MAST_FRAME.bytecode;
@@ -11023,22 +10858,14 @@ BEGIN {
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 730, 5);
         my uint $index0 := nqp::unbox_u($op0); nqp::writeuint($bytecode, nqp::add_i($elems, 2), $index0, 5);
-        {my int $value := $op1;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 4), $value, 5);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 4), $op1, 5);
     },
     'param_op_u', sub ($op0, int16 $op1, $op2) {
         my $frame := $*MAST_FRAME; my $bytecode := $frame.bytecode;
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 731, 5);
         my uint $index0 := nqp::unbox_u($op0); nqp::writeuint($bytecode, nqp::add_i($elems, 2), $index0, 5);
-        {my int $value := $op1;
-                    if $value < -32768 || 32767 < $value {
-                        nqp::die("Value outside range of 16-bit MAST::IVal");
-                    }
-                    nqp::writeuint($bytecode, nqp::add_i($elems, 4), $value, 5);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 4), $op1, 5);
         $frame.compile_label($bytecode, $op2);
     },
     'param_rn_u', sub ($op0, str $op1) {
@@ -11114,7 +10941,7 @@ BEGIN {
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 741, 5);
         my uint $index0 := nqp::unbox_u($op0); nqp::writeuint($bytecode, nqp::add_i($elems, 2), $index0, 5);
-        {my int $value := $op1; nqp::writeuint($bytecode, nqp::add_i($elems, 4), $value, 13);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 4), $op1, 13);
         my uint $index2 := nqp::unbox_u($op2); nqp::writeuint($bytecode, nqp::add_i($elems, 12), $index2, 5);
     },
     'throwpayloadlexcaller', sub ($op0, int64 $op1, $op2) {
@@ -11122,7 +10949,7 @@ BEGIN {
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 742, 5);
         my uint $index0 := nqp::unbox_u($op0); nqp::writeuint($bytecode, nqp::add_i($elems, 2), $index0, 5);
-        {my int $value := $op1; nqp::writeuint($bytecode, nqp::add_i($elems, 4), $value, 13);}
+        nqp::writeuint($bytecode, nqp::add_i($elems, 4), $op1, 13);
         my uint $index2 := nqp::unbox_u($op2); nqp::writeuint($bytecode, nqp::add_i($elems, 12), $index2, 5);
     },
     'lastexpayload', sub ($op0) {
@@ -11382,7 +11209,7 @@ BEGIN {
         my $bytecode := $*MAST_FRAME.bytecode;
         my uint $elems := nqp::elems($bytecode);
         nqp::writeuint($bytecode, $elems, 776, 5);
-        
+
     },
     'coveragecontrol', sub ($op0) {
         my $bytecode := $*MAST_FRAME.bytecode;
